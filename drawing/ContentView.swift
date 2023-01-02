@@ -6,55 +6,51 @@
 //
 
 import SwiftUI
-import Foundation
+
+struct flower: Shape {
+    var petalOffset = -20.0
+    var petalWidth = 100.0
+    
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        
+        for number in stride(from: 0, to: Double.pi * 2, by: Double.pi / 8) {
+            let rotation = CGAffineTransform(rotationAngle: number)
+            let position = rotation.concatenating(CGAffineTransform(translationX: rect.width / 2, y: rect.height / 2))
+            
+            let originalPetal = Path(ellipseIn: CGRect(x: petalOffset, y: 0, width: petalWidth, height: rect.width / 2))
+            let rotatedPetal = originalPetal.applying(position)
+            
+            path.addPath(rotatedPetal)
+        }
+        
+        return path
+    }
+}
 
 struct customColor {
     static let blueSpecial = Color("blueSpecial")
 }
 
-
-
-struct triangle: Shape {
-    func path(in rect: CGRect) -> Path {
-        var path = Path()
-        
-        path.move(to: CGPoint(x: rect.midX, y: rect.minY))
-        path.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))
-        path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
-        path.addLine(to: CGPoint(x: rect.midX, y: rect.minY))
-        
-        return path
-    }
-}
-
-struct arc: Shape {
-    let startAngle: Angle
-    let endAngle: Angle
-    let clockWise: Bool
-    
-    func path(in rect: CGRect) -> Path {
-        
-        let rotationAdjustments = Angle.degrees(90)
-        let modifiedStartAngle = startAngle - rotationAdjustments
-        let modifiedEndAngel = endAngle - rotationAdjustments
-        
-        var path = Path()
-        
-        path.addArc(center: CGPoint(x: rect.midX, y: rect.midY), radius: rect.width / 2, startAngle: modifiedStartAngle, endAngle: modifiedEndAngel, clockwise: !clockWise )
-        
-        return path
-    }
-}
-
 struct ContentView: View {
+    @State private var petalOffset = -20.0
+    @State private var petalWidth = 100.0
+    
     var body: some View {
-        arc(startAngle: .degrees(0), endAngle: .degrees(360), clockWise: true)
-            .stroke(customColor.blueSpecial, lineWidth: 7)
-            .frame(width: 300, height: 300)
-        
-//        triangle()
-//            .stroke(customColor.blueSpecial, style: StrokeStyle(lineWidth: 15, lineCap: .round, lineJoin: .round))
-//            .frame(width: 250, height: 350)
+        VStack {
+            flower(petalOffset: petalOffset, petalWidth: petalWidth)
+                .fill(customColor.blueSpecial, style: FillStyle(eoFill: true))
+//                .stroke(customColor.blueSpecial, lineWidth: 2)
+            
+            Text("Offset")
+            Slider(value: $petalOffset, in: -40...40)
+                .padding([.horizontal, .bottom])
+            
+            Text("Width")
+            Slider(value: $petalWidth, in: 0...100)
+                .padding(.horizontal)
+            
+        }
     }
 }
 
