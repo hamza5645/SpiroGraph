@@ -7,15 +7,51 @@
 
 import SwiftUI
 
-struct customColor {
-    static let blueSpecial = Color("blueSpecial")
+struct colorCyclingCircle: View {
+    var amount = 0.0
+    var steps = 100
+    
+    var body: some View {
+        ZStack {
+            ForEach(0..<steps) {value in
+                Circle()
+                    .inset(by: Double(value))
+                    .strokeBorder(
+                        LinearGradient(gradient: Gradient(colors: [
+                            color(for: value, brightness: 1),
+                            color(for: value, brightness: 0.5),
+                        ]),
+                                       startPoint: .top,
+                                       endPoint: .bottom
+                        ),
+                        lineWidth: 2
+                    )
+            }
+        }
+        .drawingGroup()
+    }
+    
+    func color(for value: Int, brightness: Double) -> Color {
+        var targetHue = Double(value) / Double(steps) + amount
+        
+        if targetHue > 1 {
+            targetHue -= 1
+        }
+        
+        return(Color(hue: targetHue, saturation: 1, brightness: brightness))
+    }
 }
 
 struct ContentView: View {
+    @State private var colorCycle = 0.0
+    
     var body: some View {
-        Capsule()
-            .strokeBorder(ImagePaint(image: Image("example"), sourceRect: CGRect(x: 0, y: 0.25, width: 0.4, height: 1),scale: 0.2), lineWidth: 60)
-            .frame(width: 300, height: 300)
+        VStack {
+            colorCyclingCircle(amount: colorCycle)
+                .frame(width: 400, height: 400)
+            
+            Slider(value: $colorCycle)
+        }
     }
 }
 
